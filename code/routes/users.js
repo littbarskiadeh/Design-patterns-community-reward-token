@@ -7,39 +7,51 @@ let dbo = new DBO()
 
 //Login User
 //http://localhost:8000/users?username=1&address=2
-router.get('/', async function (req, res, next) {
+router.get('/login', async function (req, res, next) {
   console.log('Login:')
   console.log(req.query)
 
   let User = await dbo.findUser(req.query.username)
   console.log('User Query Complete')
-  if (User.isLoggedIn) {
+  if (User != null) {
+    if (User.isLoggedIn) {
+      res.json({
+        isLoggedIn: User.isLoggedIn,
+        username: User.UserName,
+        address: User.PublicAddress,
+      })
+    } else {
+      User = await dbo.loginUser(req.query.username)
+      if (User.PublicAddress == req.query.address && User.isLoggedIn) {
+        res.json({
+          exist: true,
+          username: User.UserName,
+          address: User.PublicAddress,
+        })
+      }
+    }
+  } else {
+    res.json({ exist: false })
+  }
+})
+
+router.get('/logout', async function (req, res, next) {
+  console.log('Logout:')
+  console.log(req.query)
+
+  const User = await dbo.logoutUser(req.query.username)
+  if (User.PublicAddress == req.query.address && !User.isLoggedIn) {
     res.json({
       isLoggedIn: User.isLoggedIn,
       username: User.UserName,
       address: User.PublicAddress,
     })
-  } else {
-    User = await dbo.loginUser(req.query.username)
-    if (
-      User != null &&
-      User.PublicAddress == req.query.address &&
-      User.isLoggedIn
-    ) {
-      res.json({
-        exist: true,
-        username: User.UserName,
-        address: User.PublicAddress,
-      })
-    } else {
-      res.json({ exist: false })
-    }
   }
 })
 
 //Register User
 //http://localhost:8000/users
-router.post('/', async function (req, res, next) {
+router.post('/register', async function (req, res, next) {
   console.log('Register:')
   console.log(req.body)
   const registeredUser = await dbo.createNewUser(req.body)

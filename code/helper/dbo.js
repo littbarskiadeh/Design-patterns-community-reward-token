@@ -61,6 +61,16 @@ class DBO {
     return User
   }
 
+  logoutUser = async (username) => {
+    const User = await ModelUsers.findOneAndUpdate(
+      { UserName: username },
+      { isLoggedIn: false },
+      { new: true },
+    )
+    console.log(User)
+    return User
+  }
+
   findAllUsers = async () => {
     const AllUsers = await ModelUsers.find({})
     //console.log(all);
