@@ -3,6 +3,7 @@ import { TextField, Button } from '@material-ui/core'
 import { makeStyles } from '@material-ui/core/styles'
 import ExitToAppIcon from '@material-ui/icons/ExitToApp'
 import SaveIcon from '@material-ui/icons/Save'
+import LoggedInUser from './LoggedInUserContext'
 
 const useStyles = makeStyles((theme) => ({
   button: {
@@ -20,7 +21,7 @@ const buttonDivStyle = {
   flexDirection: 'row',
 }
 
-const LoginForm = () => {
+const LoginForm = (props) => {
   const classes = useStyles()
 
   const [username, setUsername] = useState('')
@@ -28,7 +29,7 @@ const LoginForm = () => {
 
   // Register User
   const registerUser = async () => {
-    const response = await fetch(`http://localhost:8000/users`, {
+    const response = await fetch(`http://localhost:8000/users/register`, {
       method: 'POST',
       headers: {
         Accept: 'application/json',
@@ -54,20 +55,22 @@ const LoginForm = () => {
   //Login User
   const loginUser = async () => {
     const response = await fetch(
-      `http://localhost:8000/users?username=${username}&address=${address}`,
+      `http://localhost:8000/users/login?username=${username}&address=${address}`,
     )
     const user = await response.json()
 
     // clear username and address fields
     setUsername('')
     setAddress('')
-    if (user.isLoggedIn) {
+    if (user && user.isLoggedIn) {
       alert(`You are already logged in ${user.username}.`)
+      props.history.push('/home')
     } else {
       if (user.exist) {
         alert(
           `You are now logged in ${user.username}. Start asking/answering questions!`,
         )
+        props.history.push('/home')
       } else {
         alert(`Oh no! You are not a registered user. Please register first.`)
       }
